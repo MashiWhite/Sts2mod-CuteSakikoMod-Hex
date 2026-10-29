@@ -18,9 +18,18 @@
              若你的目录结构不同，用 -p:CuteSakikoModDir=... 覆盖。 -->
         <CuteSakikoModDir Condition="'$(CuteSakikoModDir)' == ''">$(MSBuildThisFileDirectory)..\CuteSakikoMod</CuteSakikoModDir>
 
-        <!-- 主模组 DLL 引用：优先游戏 mods 目录（发布的正式版），
-             不存在则回退到主模组工程的编译产物（本地开发时更方便）。 -->
+        <!-- 主模组 DLL 引用的查找顺序（第一个命中的生效）：
+             ① 命令行 -p:CuteSakikoModDll=... 显式指定
+             ② 游戏 mods 目录（手动安装的正式版）
+             ③ Steam 工坊订阅缓存（订阅方式安装时在这里，路径含工坊 item id）
+             ④ 主模组工程的编译产物 bin/ 目录（本地刚编译过最新版）
+             ⑤ 主模组工程根目录的 dll（最老，仅兜底）
+             ⚠️ 主模组一旦上架工坊，游戏会从工坊拉取，:mods 目录下就没有了，
+                所以要查 ③ 和 ④，否则会误用根目录里遗留的旧 dll（2026-10-29 踩坑）。 -->
         <CuteSakikoModDll Condition="'$(CuteSakikoModDll)' == '' AND Exists('$(Sts2Dir)/mods/CuteSakikoMod/CuteSakikoMod.dll')">$(Sts2Dir)/mods/CuteSakikoMod/CuteSakikoMod.dll</CuteSakikoModDll>
+        <SteamWorkshopModDir Condition="'$(SteamWorkshopModDir)' == ''">E:/SteamLibrary/steamapps/workshop/content/2868840/3747559888</SteamWorkshopModDir>
+        <CuteSakikoModDll Condition="'$(CuteSakikoModDll)' == '' AND Exists('$(SteamWorkshopModDir)/CuteSakikoMod.dll')">$(SteamWorkshopModDir)/CuteSakikoMod.dll</CuteSakikoModDll>
+        <CuteSakikoModDll Condition="'$(CuteSakikoModDll)' == '' AND Exists('$(CuteSakikoModDir)/bin/Debug/CuteSakikoMod.dll')">$(CuteSakikoModDir)/bin/Debug/CuteSakikoMod.dll</CuteSakikoModDll>
         <CuteSakikoModDll Condition="'$(CuteSakikoModDll)' == ''">$(CuteSakikoModDir)/CuteSakikoMod.dll</CuteSakikoModDll>
 
         <!-- 模组输出目录 -->
