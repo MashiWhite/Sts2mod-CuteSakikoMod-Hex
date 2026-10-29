@@ -88,7 +88,7 @@
   "CUTE_SAKIKO_MOD_RESONANCE_ECHO_RUNE.title": "共鳴の残響",
   "CUTE_SAKIKO_MOD_RESONANCE_ECHO_RUNE.description": "毎ターン最初に[gold]コード[/gold]を演奏した後、その[gold]コード[/gold]をストレージに戻す。",
   "CUTE_SAKIKO_MOD_CAT_GUARD_RUNE.title": "猫の守り",
-  "CUTE_SAKIKO_MOD_CAT_GUARD_RUNE.description": "ターン終了時・捨てる前、手札の[gold]猫[/gold]カード1枚ごとに[blue]2[/blue][blue]ブロック[/blue]を得る。",
+  "CUTE_SAKIKO_MOD_CAT_GUARD_RUNE.description": "ターン終了前に、手札の[gold]猫[/gold]カード1枚ごとに[blue]2[/blue][blue]ブロック[/blue]を得る。",
   "CUTE_SAKIKO_MOD_PARFAIT_EXCHANGE_RUNE.title": "パフェ交換",
   "CUTE_SAKIKO_MOD_PARFAIT_EXCHANGE_RUNE.description": "[gold]抹茶パフェ[/gold]を飲食するたび、[gold]筋力[/gold][blue]1[/blue]を得る。",
   "CUTE_SAKIKO_MOD_CAT_RESONANCE_RUNE.title": "猫の共鳴",

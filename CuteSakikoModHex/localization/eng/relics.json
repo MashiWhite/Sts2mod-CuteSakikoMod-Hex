@@ -88,7 +88,7 @@
   "CUTE_SAKIKO_MOD_RESONANCE_ECHO_RUNE.title": "Resonant Echo",
   "CUTE_SAKIKO_MOD_RESONANCE_ECHO_RUNE.description": "The first time you play a [gold]Chord[/gold] each turn, add that [gold]Chord[/gold] back to your storage.",
   "CUTE_SAKIKO_MOD_CAT_GUARD_RUNE.title": "Cat Guardianship",
-  "CUTE_SAKIKO_MOD_CAT_GUARD_RUNE.description": "At end of turn, before discarding, gain [blue]2[/blue] [blue]Block[/blue] for each [gold]Cat[/gold] card in your hand.",
+  "CUTE_SAKIKO_MOD_CAT_GUARD_RUNE.description": "At end of turn, gain [blue]2[/blue] [blue]Block[/blue] for each [gold]Cat[/gold] card in your hand.",
   "CUTE_SAKIKO_MOD_PARFAIT_EXCHANGE_RUNE.title": "Parfait Exchange",
   "CUTE_SAKIKO_MOD_PARFAIT_EXCHANGE_RUNE.description": "Whenever you consume [gold]Matcha Parfait[/gold], gain [blue]1[/blue] [gold]Strength[/gold].",
   "CUTE_SAKIKO_MOD_CAT_RESONANCE_RUNE.title": "Cat Resonance",
