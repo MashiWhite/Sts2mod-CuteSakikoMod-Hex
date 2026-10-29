@@ -1,0 +1,176 @@
+<Project Sdk="Godot.NET.Sdk/4.5.1">
+    <PropertyGroup>
+        <!-- 基础框架 -->
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>true</ImplicitUsings>
+        <LangVersion>13.0</LangVersion>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <!-- ============================================================
+             环境路径（换机器时只改这三行，或用 -p: 命令行覆盖）
+             ============================================================ -->
+        <Sts2Dir Condition="'$(Sts2Dir)' == ''">E:/SteamLibrary/steamapps/common/Slay the Spire 2</Sts2Dir>
+        <Sts2DataDir>$(Sts2Dir)/data_sts2_windows_x86_64</Sts2DataDir>
+        <GodotPath Condition="'$(GodotPath)' == ''">E:/SLJT2/anti/GODOT/Godot_v4.5.1-stable_mono_win64.exe</GodotPath>
+
+        <!-- 主模组（CuteSakikoMod）工程目录：本工程与它并列放在 RiderProjects\ 下。
+             若你的目录结构不同，用 -p:CuteSakikoModDir=... 覆盖。 -->
+        <CuteSakikoModDir Condition="'$(CuteSakikoModDir)' == ''">$(MSBuildThisFileDirectory)..\CuteSakikoMod</CuteSakikoModDir>
+
+        <!-- 主模组 DLL 引用：优先游戏 mods 目录（发布的正式版），
+             不存在则回退到主模组工程的编译产物（本地开发时更方便）。 -->
+        <CuteSakikoModDll Condition="'$(CuteSakikoModDll)' == '' AND Exists('$(Sts2Dir)/mods/CuteSakikoMod/CuteSakikoMod.dll')">$(Sts2Dir)/mods/CuteSakikoMod/CuteSakikoMod.dll</CuteSakikoModDll>
+        <CuteSakikoModDll Condition="'$(CuteSakikoModDll)' == ''">$(CuteSakikoModDir)/CuteSakikoMod.dll</CuteSakikoModDll>
+
+        <!-- 模组输出目录 -->
+        <ModsPath>$(Sts2Dir)/mods/</ModsPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="CuteSakikoMod">
+          <HintPath>$(CuteSakikoModDll)</HintPath>
+          <Private>false</Private>
+        </Reference>
+        <Reference Include="HextechRunes">
+          <HintPath>$(CuteSakikoModDir)\packages\sts2mod.hex\lib\0.111.0\HextechRunes.dll</HintPath>
+          <Private>false</Private>
+        </Reference>
+        <Reference Include="STS2-RitsuLib.Runtime">
+          <HintPath>$(CuteSakikoModDir)\packages\sts2.ritsulib\0.6.10\lib\net9.0\STS2-RitsuLib.Runtime.dll</HintPath>
+          <Private>false</Private>
+        </Reference>
+        <Reference Include="sts2">
+            <HintPath>$(Sts2DataDir)/sts2.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+
+        <Reference Include="0Harmony">
+            <HintPath>$(Sts2DataDir)/0Harmony.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="CuteSakikoModHexCode\Relics\Forges\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="CuteSakikoModHex.json" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModAllMemoriesRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModAllMemoriesRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModBansogoRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModBansogoRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModCarefreeRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModCarefreeRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModEasyMemoryRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModEasyMemoryRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModNonstopPerformanceRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModNonstopPerformanceRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModOctopusFistRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModOctopusFistRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\big\CuteSakikoModSustainedPressureRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModSustainedPressureRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModWhiteBirthdayRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\big\cuteSakikoModWhiteBirthdayRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModAllMemoriesRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModAllMemoriesRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModBansogoRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModBansogoRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModCarefreeRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModCarefreeRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModEasyMemoryRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModEasyMemoryRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModNonstopPerformanceRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModNonstopPerformanceRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModOctopusFistRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModOctopusFistRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModSustainedPressureRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModSustainedPressureRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModWhiteBirthdayRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModWhiteBirthdayRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModBeatGuardRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModBeatGuardRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModCatGratitudeRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModCatGratitudeRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModCollapseInsuranceRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModCollapseInsuranceRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModFirstEncoreRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModFirstEncoreRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModForgetMasterRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModForgetMasterRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModForgottenFlavorRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModForgottenFlavorRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModMemoryFloodRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModMemoryFloodRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModNekoKingRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModNekoKingRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModParfaitTimeRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModParfaitTimeRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModPerfectPitchRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModPerfectPitchRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModPressureArtRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModPressureArtRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModPressureIntoStrengthRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModPressureIntoStrengthRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModPressureTransferRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModPressureTransferRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModQuartetRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModQuartetRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModRanaMomentRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModRanaMomentRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModSparePickRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModSparePickRune.png.import" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModSweetAppetiteRune.png" />
+      <Content Include="CuteSakikoModHex\images\relics\cuteSakikoModSweetAppetiteRune.png.import" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModPressureRefineRune.png" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModPressureRefineRune.png.import" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModMemoryResonanceRune.png" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModMemoryResonanceRune.png.import" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModForgetRitualRune.png" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModForgetRitualRune.png.import" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModNoteAlchemyRune.png" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModNoteAlchemyRune.png.import" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModChordDismantleRune.png" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModChordDismantleRune.png.import" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModResonanceEchoRune.png" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModResonanceEchoRune.png.import" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModCatGuardRune.png" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModCatGuardRune.png.import" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModParfaitExchangeRune.png" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModParfaitExchangeRune.png.import" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModCatResonanceRune.png" />
+    <Content Include="CuteSakikoModHex\images\relics\CuteSakikoModCatResonanceRune.png.import" />
+      <Content Include="CuteSakikoModHex\localization\eng\powers.json" />
+      <Content Include="CuteSakikoModHex\localization\eng\relics.json" />
+      <Content Include="CuteSakikoModHex\localization\jpn\powers.json" />
+      <Content Include="CuteSakikoModHex\localization\jpn\relics.json" />
+      <Content Include="CuteSakikoModHex\localization\zhs\powers.json" />
+      <Content Include="CuteSakikoModHex\localization\zhs\relics.json" />
+      <Content Include="CuteSakikoModHex\localization\zhs\relic_collection.json" />
+      <Content Include="CuteSakikoModHex\mod_image.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <!-- RitsuLib 走 NuGet；STS2-RitsuLib.Runtime 的显式引用已在顶部 ItemGroup 里
+           （用 $(CuteSakikoModDir) 解析，换机器只需改一个属性） -->
+      <PackageReference Include="STS2.RitsuLib" Version="0.6.10" />
+    </ItemGroup>
+
+    <!-- 自动复制 dll 和 json（保留你的原目标，但为了顺序稍作调整） -->
+    <Target Name="CopyMod" AfterTargets="Build">
+        <Message Text="Copying mod DLL and JSON to $(ModsPath)" Importance="high" />
+        <MakeDir Directories="$(ModsPath)$(MSBuildProjectName)" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsPath)$(MSBuildProjectName)" />
+        <Copy SourceFiles="$(MSBuildProjectName).json" DestinationFolder="$(ModsPath)$(MSBuildProjectName)" />
+    </Target>
+
+    <Target Name="BuildPck" AfterTargets="Build"
+            Condition="'$(GodotPath)' != '' and Exists('$(GodotPath)') and '$(IsInnerGodotExport)' != 'true'">
+        <Message Text="Exporting Godot .pck to mods folder (from Build)" Importance="high"/>
+        <Exec Command="&quot;$(GodotPath)&quot; --headless --export-pack &quot;CuteSakikoModHex.pck&quot; &quot;$(ModsPath)$(MSBuildProjectName)/$(MSBuildProjectName).pck&quot;"
+              WorkingDirectory="$(MSBuildProjectDirectory)"
+              EnvironmentVariables="IsInnerGodotExport=true;MSBUILDDISABLENODEREUSE=1"
+              ContinueOnError="WarnAndContinue" />
+    </Target>
+</Project>

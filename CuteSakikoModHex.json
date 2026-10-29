@@ -1,0 +1,26 @@
+{
+  "id": "CuteSakikoModHex",           
+  "name": "海克斯拓展包-可爱小祥mod",
+  "author": "MashiWhite",
+  "description": "为海克斯符文模组中添加一些[blue]可爱小祥[/blue]mod内角色的专属内容。",
+  "version": "0.0.2",
+  "min_game_version": "0.111.0", 
+  "has_pck": true,         
+  "has_dll": true,        
+  "dependencies":
+  [
+    {
+      "id": "STS2-RitsuLib",
+      "min_version": "0.6.10"
+    },
+    {
+      "id": "CuteSakikoMod",
+      "min_version": "0.3.70"
+    },
+    {
+      "id": "HextechRunes",
+      "min_version": "0.9.2"
+    }
+  ],
+  "affects_gameplay": true 
+}
