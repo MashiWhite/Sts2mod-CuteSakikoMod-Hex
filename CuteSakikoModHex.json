@@ -3,7 +3,7 @@
   "name": "海克斯拓展包-可爱小祥mod",
   "author": "MashiWhite",
   "description": "为海克斯符文模组中添加一些[blue]可爱小祥[/blue]mod内角色的专属内容。",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "min_game_version": "0.111.0",
   "has_pck": true,
   "has_dll": true,

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using CuteSakikoMod.CuteSakikoModCode.Powers.Basic;
 using CuteSakikoMod.CuteSakikoModCode.Powers.Buff;
@@ -266,12 +267,32 @@ public static class ResonanceEchoPatch
         return AccessTools.Method(type, "NotifyChordPlayedAsync");
     }
 
+    /// <summary>
+    ///     ⚠️ 原方法是 <c>async Task</c>，Harmony 的 postfix **不能**声明成
+    ///     <c>static Task Postfix(...)</c> —— 那会被当成 pass-through patch，
+    ///     要求返回类型与第一个参数类型一致，直接抛 HarmonyException 导致整个
+    ///     mod 初始化失败（2026-10-30 实测）。
+    ///     正确做法：返回 void，用 <c>ref Task __result</c> 拿到原方法返回的 Task，
+    ///     再挂 ContinueWith 在它完成后执行我们的逻辑。
+    /// </summary>
     [HarmonyPostfix]
-    public static async Task Postfix(
+    public static void Postfix(
+        ref Task __result,
         MegaCrit.Sts2.Core.Entities.Players.Player player)
     {
-        if (player == null) return;
+        if (__result == null || player == null) return;
 
+        Task original = __result;
+
+        __result = original.ContinueWith(
+            _ => RefillChordAsync(player),
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default).Unwrap();
+    }
+
+    private static async Task RefillChordAsync(MegaCrit.Sts2.Core.Entities.Players.Player player)
+    {
         var relic = player.Relics.OfType<CuteSakikoModResonanceEchoRune>().FirstOrDefault();
         if (relic == null) return;
         if (string.IsNullOrEmpty(relic.PendingChordId)) return;
