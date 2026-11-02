@@ -12,11 +12,13 @@ namespace CuteSakikoModHex.CuteSakikoModHexCode.Relics.Runes.Anon.Prismatic;
 ///     共鸣回响（棱彩·爱音）：
 ///     每回合你第一次演奏[gold]和弦[/gold]后，将该和弦加回储存位。
 ///     （现有和弦符文都是"加数值/加容量/加抽牌"，本条是规则改写：重复利用）
-///     实现说明：AfterChordPlayed 触发时和弦尚未从储存位移除
-///     （PlaySingleChordInternalAsync 的顺序是 Effect → AfterChordPlayed → removeStored），
-///     若在此直接 AddStoredChordAsync，加进去的副本会被随后的 removeStored 误删，净效果为零。
-///     因此改为记录待回填的和弦，由 Harmony 补丁在 removeStored+SaveState 之后
-///     （NotifyChordPlayedAsync 尾部）真正加回，见 Patches/HexRunePatches.ResonanceEchoPatch。
+///     实现说明（2026-11-02 修订）：回填不能在 AfterChordPlayed 里直接做——
+///     那时原和弦还在储存位，随后执行的 removeStored 会把刚加的副本误删；
+///     也不能挂 NotifyChordPlayedAsync 尾部——PlaySingleChordInternalAsync 在它之后
+///     还有一次用旧快照的无条件 SaveState，会把回填覆盖掉（这是 0.0.4 前符文无效的根因）。
+///     现在的方案：此处只记录 PendingChordId，Harmony 补丁挂在
+///     PlaySingleChordInternalAsync 整体完成之后（见 Patches/HexRunePatches.ResonanceEchoPatch），
+///     经本体 ChordNoteSystem.RefillStoredChordSilentAsync 静默回填。
 /// </summary>
 public sealed class CuteSakikoModResonanceEchoRune : CuteAnonHextechRelicBase, IChordNoteHookHandler
 {

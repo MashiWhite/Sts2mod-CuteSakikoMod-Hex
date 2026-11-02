@@ -252,11 +252,19 @@ public static class NoteAlchemyBonusPatch
 
 /// <summary>
 ///     共鸣回响（棱彩·爱音）：
-///     在 PlaySingleChordInternalAsync 的 removeStored + SaveState 之后
-///     （NotifyChordPlayedAsync 尾部）把 AfterChordPlayed 记录的待回填和弦真正加回储存位。
-///     不能在 AfterChordPlayed 里直接加——那时原和弦还在储存位，随后执行的
-///     removeStored（FindLastIndex 删最后一个匹配）会把刚加的副本误删，净效果为零。
-///     NotifyChordPlayedAsync 是 private async，走反射定位。
+///     在 PlaySingleChordInternalAsync 整体完成（含尾部 SaveState）之后，
+///     把 AfterChordPlayed 记录的待回填和弦真正加回储存位。
+///     ★ 根因记录（2026-11-02）：旧版挂在 NotifyChordPlayedAsync 尾部——但
+///     PlaySingleChordInternalAsync 在 await NotifyChordPlayedAsync 之后还有一行
+///     无条件 SaveState(player, state)，用的是方法入口传入的旧快照
+///     （和弦状态是字符串反序列化副本），会把回填刚写入的和弦覆盖掉，净效果恒为零。
+///     因此挂点必须挪到整个方法完成之后（本类），回填改走本体的
+///     RefillStoredChordSilentAsync（不重置首演/充能操作标志、不触发 Matched 钩子、
+///     储存位满时顶掉最旧）。
+///     ⚠️ 方案 A（2026-11-02 用户拍板）：按描述字面，每回合第一次"演奏"不论来源
+///     都回填——removeStored=false 的自动/批量演奏路径也会回填，Recorder 等组合因此变强，
+///     属预期行为。
+///     PlaySingleChordInternalAsync 是 private static async，走反射定位。
 /// </summary>
 [HarmonyPatch]
 public static class ResonanceEchoPatch
@@ -264,7 +272,7 @@ public static class ResonanceEchoPatch
     static MethodBase TargetMethod()
     {
         var type = AccessTools.TypeByName("CuteSakikoMod.CuteSakikoModCode.Systems.Chord.ChordNoteSystem");
-        return AccessTools.Method(type, "NotifyChordPlayedAsync");
+        return AccessTools.Method(type, "PlaySingleChordInternalAsync");
     }
 
     /// <summary>
@@ -278,32 +286,30 @@ public static class ResonanceEchoPatch
     [HarmonyPostfix]
     public static void Postfix(
         ref Task __result,
-        MegaCrit.Sts2.Core.Entities.Players.Player player)
+        MegaCrit.Sts2.Core.Entities.Players.Player player,
+        string chordId)
     {
-        if (__result == null || player == null) return;
+        if (__result == null || player == null || string.IsNullOrEmpty(chordId)) return;
 
         Task original = __result;
 
         __result = original.ContinueWith(
-            _ => RefillChordAsync(player),
+            _ => RefillChordAsync(player, chordId),
             CancellationToken.None,
             TaskContinuationOptions.ExecuteSynchronously,
             TaskScheduler.Default).Unwrap();
     }
 
-    private static async Task RefillChordAsync(MegaCrit.Sts2.Core.Entities.Players.Player player)
+    private static async Task RefillChordAsync(
+        MegaCrit.Sts2.Core.Entities.Players.Player player, string chordId)
     {
         var relic = player.Relics.OfType<CuteSakikoModResonanceEchoRune>().FirstOrDefault();
         if (relic == null) return;
         if (string.IsNullOrEmpty(relic.PendingChordId)) return;
+        if (relic.PendingChordId != chordId) return; // 本回合首次演奏已被其它路径消费
 
-        var chordId = relic.PendingChordId;
         relic.PendingChordId = ""; // 先消费，防止重入
 
-        // 储存位已满时不再加（避免顶掉原有和弦）
-        var stored = ChordNoteSystem.GetStoredChords(player);
-        if (stored.Count >= ChordNoteSystem.GetMaxStoredChords(player)) return;
-
-        await ChordNoteSystem.AddStoredChordAsync(player, chordId);
+        await ChordNoteSystem.RefillStoredChordSilentAsync(player, chordId);
     }
 }
