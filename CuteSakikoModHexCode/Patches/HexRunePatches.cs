@@ -48,28 +48,38 @@ public static class PressureCollapsePatch
 
     [HarmonyPrefix]
     [HarmonyPriority(Priority.High)]
-    public static void Prefix(
+    public static bool Prefix(
         PressurePower __instance,
         MegaCrit.Sts2.Core.GameActions.Multiplayer.PlayerChoiceContext ctx,
-        out CollapseOutcome __state)
+        out CollapseOutcome __state,
+        ref Task __result)
     {
         __state = CollapseOutcome.None;
+        __result = Task.CompletedTask;
         var owner = __instance.Owner;
-        if (owner == null || !owner.IsAlive) return;
+        if (owner == null || !owner.IsAlive) return true;
 
         // 02：本战未用过 → 崩溃保险优先接管（清压力 + 得格挡）
         if (owner.Player?.Relics.OfType<CuteSakikoModCollapseInsuranceRune>()
                 .Any(r => !r.UsedThisCombat) == true)
         {
             __state = CollapseOutcome.Insurance;
-            return;
+            return false;   // 跳过原方法，Postfix 拿回控制权
         }
 
-        // 07：不崩溃也不清压力
+        // 07：压力即艺术 → 不崩溃、也不清压力。
+        // ★ 必须 return false 真正跳过原方法（2026-11-07 修）：
+        //   原 Prefix 只设了 __state 却仍然返回 true，原方法照常执行
+        //   （Amount >= CurrentHp 时清空压力 + 施加 BreakDownPower）→ 玩家仍然崩溃。
+        //   之前注释写"原任务照常返回即可，无需替换"是错的：__result 已被赋成
+        //   Task.CompletedTask，但 __runOriginal 仍为 true，原方法体照样跑。
         if (CuteSakikoModPressureArtRune.IsOwnedBy(owner))
         {
             __state = CollapseOutcome.Art;
+            return false;   // 跳过原方法：不崩溃、压力保留
         }
+
+        return true;        // 无相关符文 → 走原逻辑
     }
 
     [HarmonyPostfix]
@@ -91,7 +101,8 @@ public static class PressureCollapsePatch
             return;
         }
 
-        // 07 压力即艺术：不崩溃。压力照常保留 → 原任务照常返回即可，无需替换。
+        // 07 压力即艺术：Prefix 已 return false 跳过原方法（不崩溃、压力保留），
+        // 这里无需再动 __result —— 它仍是 Prefix 里赋的 Task.CompletedTask。
     }
 }
 
