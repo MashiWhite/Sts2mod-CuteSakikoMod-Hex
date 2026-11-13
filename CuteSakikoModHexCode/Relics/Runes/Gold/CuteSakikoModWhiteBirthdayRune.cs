@@ -1,4 +1,4 @@
-﻿using CuteSakikoMod.CuteSakikoModCode.Cards.Saki.Rare;
+using CuteSakikoMod.CuteSakikoModCode.Cards.Saki.Rare;
 using CuteSakikoMod.CuteSakikoModCode.Character.Mujica; 
 using HextechRunes;
 using MegaCrit.Sts2.Core.Commands;
@@ -23,7 +23,8 @@ namespace CuteSakikoModHex.CuteSakikoModHexCode.Relics.Runes.Gold
 
         public override Task BeforeCardPlayed(CardPlay cardPlay)
         {
-            if (cardPlay.Card is BlackBirthday && cardPlay.Player == Owner)
+            // 0.107 的 CardPlay 没有 Player 属性；Card.Owner 三版都在且语义相同。
+            if (cardPlay.Card is BlackBirthday && cardPlay.Card.Owner == Owner)
             {
                 _prePlayHp = Owner.Creature.CurrentHp;
             }
@@ -32,7 +33,7 @@ namespace CuteSakikoModHex.CuteSakikoModHexCode.Relics.Runes.Gold
 
         public override async Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
         {
-            if (cardPlay.Card is BlackBirthday && cardPlay.Player == Owner && _prePlayHp >= 0)
+            if (cardPlay.Card is BlackBirthday && cardPlay.Card.Owner == Owner && _prePlayHp >= 0)
             {
                 int hpLost = _prePlayHp - Owner.Creature.CurrentHp;
                 if (hpLost > 0)

@@ -14,16 +14,16 @@
 |---|---|---|
 | 《杀戮尖塔 2》 | 0.111.0 | — |
 | [HextechRunes](https://github.com/s1f102500012/HextechRunes) | 0.9.2 | 符文框架本体 |
-| [CuteSakikoMod（可爱小祥）](https://github.com/MashiWhite/Sts2mod-CuteSakikoMod) | 0.3.70 | 角色、卡牌、机制来源 |
+| [CuteSakikoMod（可爱小祥）](https://github.com/MashiWhite/Sts2mod-CuteSakikoMod) | 0.4.1 | 角色、卡牌、机制来源 |
 | STS2-RitsuLib | 0.6.10 | 底层框架 |
 
-⚠️ **主模组需先于本模组安装**：本模组依赖主模组 0.3.71+ 提供的两个公开接口
+⚠️ **主模组需先于本模组安装**：本模组依赖主模组 0.4.1+ 提供的两个公开接口
 （`ChordNoteSystem.IStoredChordCapacityProvider`、`MatchaParfait.BrainFreezeSuppressor`），
 装旧版本会缺接口。
 
 ---
 
-## 符文一览（25 个）
+## 符文一览（34 个）
 
 ### 祥子线（tag: CUTE_SAKIKO）
 

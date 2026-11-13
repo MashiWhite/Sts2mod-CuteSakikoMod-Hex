@@ -11,7 +11,7 @@
              环境路径（换机器时只改这三行，或用 -p: 命令行覆盖）
              ============================================================ -->
         <Sts2Dir Condition="'$(Sts2Dir)' == ''">E:/SteamLibrary/steamapps/common/Slay the Spire 2</Sts2Dir>
-        <Sts2DataDir>$(Sts2Dir)/data_sts2_windows_x86_64</Sts2DataDir>
+        <Sts2DataDir Condition="'$(Sts2DataDir)' == ''">$(Sts2Dir)/data_sts2_windows_x86_64</Sts2DataDir>
         <GodotPath Condition="'$(GodotPath)' == ''">E:/SLJT2/anti/GODOT/Godot_v4.5.1-stable_mono_win64.exe</GodotPath>
 
         <!-- 主模组（CuteSakikoMod）工程目录：本工程与它并列放在 RiderProjects\ 下。
@@ -36,17 +36,48 @@
         <ModsPath>$(Sts2Dir)/mods/</ModsPath>
     </PropertyGroup>
 
+    <!-- ★ 按游戏版本构建变体：0.111.0 / 0.113.0（0.107.1 预留）。
+         版本可用 -p:Sts2GameVersion=... 显式指定，否则读游戏 release_info.json；
+         HextechRunes 与 RitsuLib 的引用也跟着切。 -->
+    <PropertyGroup>
+        <_Sts2GameVersion Condition="'$(Sts2GameVersion)' != ''">$(Sts2GameVersion)</_Sts2GameVersion>
+        <_Sts2ReleaseInfoPath>$(Sts2Dir)/release_info.json</_Sts2ReleaseInfoPath>
+        <_Sts2ReleaseInfo Condition="Exists('$(_Sts2ReleaseInfoPath)')">$([System.IO.File]::ReadAllText('$(_Sts2ReleaseInfoPath)'))</_Sts2ReleaseInfo>
+        <_Sts2GameVersion Condition="'$(_Sts2GameVersion)' == '' and '$(_Sts2ReleaseInfo)' != ''">$([System.Text.RegularExpressions.Regex]::Match($(_Sts2ReleaseInfo), '"version"\s*:\s*"v?([0-9]+\.[0-9]+\.[0-9]+)"').Groups[1].Value)</_Sts2GameVersion>
+        <HextechRefTarget Condition="'$(HextechRefTarget)' == '' and '$(_Sts2GameVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(_Sts2GameVersion)', '0.113.0'))">0.113.0</HextechRefTarget>
+        <HextechRefTarget Condition="'$(HextechRefTarget)' == ''">0.111.0</HextechRefTarget>
+        <RitsuLibPackageId Condition="'$(RitsuLibPackageId)' == ''">STS2.RitsuLib</RitsuLibPackageId>
+        <RitsuLibPackageVersion Condition="'$(RitsuLibPackageVersion)' == ''">0.6.11</RitsuLibPackageVersion>
+        <RitsuLibRuntimeDll Condition="'$(RitsuLibRuntimeDll)' == ''">$(CuteSakikoModDir)\packages\sts2.ritsulib\0.6.11\lib\net9.0\STS2-RitsuLib.Runtime.dll</RitsuLibRuntimeDll>
+    </PropertyGroup>
+
+    <Target Name="LogHextechRefTarget" BeforeTargets="CoreCompile">
+        <Message Text="[CuteSakikoModHex] Game '$(_Sts2GameVersion)' -&gt; HextechRunes $(HextechRefTarget) variant / $(RitsuLibPackageId) $(RitsuLibPackageVersion)" Importance="high" />
+    </Target>
+
+    <!-- 0.108 起伤害管线带 CardPlay 参数（0.107 只有 FromCard(CardModel)）。 -->
+    <PropertyGroup Condition="'$(_Sts2GameVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(_Sts2GameVersion)', '0.108.0'))">
+        <DefineConstants>$(DefineConstants);CSK_GAME_108_OR_NEWER</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- 加载器工程在 loader/ 下，不能编进变体程序集。 -->
+        <Compile Remove="loader/**" />
+        <EmbeddedResource Remove="loader/**" />
+        <None Remove="loader/**" />
+    </ItemGroup>
+
     <ItemGroup>
         <Reference Include="CuteSakikoMod">
           <HintPath>$(CuteSakikoModDll)</HintPath>
           <Private>false</Private>
         </Reference>
         <Reference Include="HextechRunes">
-          <HintPath>$(CuteSakikoModDir)\packages\sts2mod.hex\lib\0.111.0\HextechRunes.dll</HintPath>
+          <HintPath>$(CuteSakikoModDir)\packages\sts2mod.hex\lib\$(HextechRefTarget)\HextechRunes.dll</HintPath>
           <Private>false</Private>
         </Reference>
         <Reference Include="STS2-RitsuLib.Runtime">
-          <HintPath>$(CuteSakikoModDir)\packages\sts2.ritsulib\0.6.10\lib\net9.0\STS2-RitsuLib.Runtime.dll</HintPath>
+          <HintPath>$(RitsuLibRuntimeDll)</HintPath>
           <Private>false</Private>
         </Reference>
         <Reference Include="sts2">
@@ -163,23 +194,45 @@
     <ItemGroup>
       <!-- RitsuLib 走 NuGet；STS2-RitsuLib.Runtime 的显式引用已在顶部 ItemGroup 里
            （用 $(CuteSakikoModDir) 解析，换机器只需改一个属性） -->
-      <PackageReference Include="STS2.RitsuLib" Version="0.6.10" />
+      <PackageReference Include="$(RitsuLibPackageId)" Version="$(RitsuLibPackageVersion)" />
     </ItemGroup>
 
-    <!-- 自动复制 dll 和 json（保留你的原目标，但为了顺序稍作调整） -->
-    <Target Name="CopyMod" AfterTargets="Build">
+    <!-- 自动复制 dll 和 json（变体构建用 -p:SkipDeploy=true 跳过）。
+         ⚠️ mods 里已是「加载器 + 变体」结构时，裸 dotnet build 的单 dll 不许覆盖加载器。 -->
+    <Target Name="CopyMod" AfterTargets="Build" Condition="'$(SkipDeploy)' != 'true'">
+        <PropertyGroup>
+            <_HexBundleDeployed Condition="Exists('$(ModsPath)$(MSBuildProjectName)\csk-hex-variants.manifest')">true</_HexBundleDeployed>
+            <_HexIsSingleDll Condition="'$(AssemblyName)' == '$(MSBuildProjectName)'">true</_HexIsSingleDll>
+        </PropertyGroup>
+        <Warning Condition="'$(_HexBundleDeployed)' == 'true' and '$(_HexIsSingleDll)' == 'true'"
+                 Text="mods 里已是加载器结构，裸 dotnet build 不覆盖加载器；更新请用 tools\build-bundle.ps1。" />
         <Message Text="Copying mod DLL and JSON to $(ModsPath)" Importance="high" />
         <MakeDir Directories="$(ModsPath)$(MSBuildProjectName)" />
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsPath)$(MSBuildProjectName)" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsPath)$(MSBuildProjectName)"
+              Condition="'$(_HexBundleDeployed)' != 'true' or '$(_HexIsSingleDll)' != 'true'" />
         <Copy SourceFiles="$(MSBuildProjectName).json" DestinationFolder="$(ModsPath)$(MSBuildProjectName)" />
     </Target>
 
+    <!-- pck 两段式：Godot 孙进程在 DSH 沙箱里写不进游戏 mods（也写不进 Rider\**），
+         先导出到 $(PckStagingDir)，再由 MSBuild Copy 搬进 mods。
+         依据：提示词\通用\01-规范\调试与工具链.txt §3；本体 csproj 同款。 -->
+    <PropertyGroup>
+        <PckStagingDir Condition="'$(PckStagingDir)' == ''">E:\SLJT2\.build-check</PckStagingDir>
+    </PropertyGroup>
+
     <Target Name="BuildPck" AfterTargets="Build"
-            Condition="'$(GodotPath)' != '' and Exists('$(GodotPath)') and '$(IsInnerGodotExport)' != 'true'">
-        <Message Text="Exporting Godot .pck to mods folder (from Build)" Importance="high"/>
-        <Exec Command="&quot;$(GodotPath)&quot; --headless --export-pack &quot;CuteSakikoModHex.pck&quot; &quot;$(ModsPath)$(MSBuildProjectName)/$(MSBuildProjectName).pck&quot;"
-              WorkingDirectory="$(MSBuildProjectDirectory)"
+            Condition="'$(SkipPck)' != 'true' and '$(GodotPath)' != '' and Exists('$(GodotPath)') and '$(IsInnerGodotExport)' != 'true'">
+        <Message Text="Exporting Godot .pck to staging (from Build)" Importance="high"/>
+        <MakeDir Directories="$(PckStagingDir)"/>
+        <Exec Command="&quot;$(GodotPath)&quot; --headless --path &quot;$(MSBuildProjectDirectory)&quot; --export-pack &quot;CuteSakikoModHex.pck&quot; &quot;$(PckStagingDir)\$(MSBuildProjectName).pck&quot;"
               EnvironmentVariables="IsInnerGodotExport=true;MSBUILDDISABLENODEREUSE=1"
               ContinueOnError="WarnAndContinue" />
+        <Copy SourceFiles="$(PckStagingDir)\$(MSBuildProjectName).pck"
+              DestinationFolder="$(ModsPath)$(MSBuildProjectName)"
+              Condition="Exists('$(PckStagingDir)\$(MSBuildProjectName).pck')"/>
+        <Message Text="Pck copied to $(ModsPath)$(MSBuildProjectName) via MSBuild." Importance="high"
+                 Condition="Exists('$(PckStagingDir)\$(MSBuildProjectName).pck')"/>
+        <Warning Text="pck staging failed; the mods folder keeps the previous pck."
+                 Condition="!Exists('$(PckStagingDir)\$(MSBuildProjectName).pck')"/>
     </Target>
 </Project>

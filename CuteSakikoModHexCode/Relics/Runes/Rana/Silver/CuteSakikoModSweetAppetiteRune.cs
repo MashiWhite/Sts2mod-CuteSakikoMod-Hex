@@ -17,7 +17,7 @@ namespace CuteSakikoModHex.CuteSakikoModHexCode.Relics.Runes.Rana.Silver;
 /// </summary>
 public sealed class CuteSakikoModSweetAppetiteRune : CuteRanaHextechRelicBase
 {
-    private const string TurnProcKey = "SweetAppetite";
+    // HextechRunes 0.10.0 起 TryConsumeTurnProc 不再收 key，计数由 ref 字段按遗物实例隔离。
 
     /// <summary>
     ///     本回合已触发次数。**必须是字段**（原因同节拍防护）：
@@ -67,7 +67,7 @@ public sealed class CuteSakikoModSweetAppetiteRune : CuteRanaHextechRelicBase
 
             // 每回合第一次：按持有者回合号懒清零后消费配额
             EnsureTurnScopedStateCurrent(() => _procsThisTurn = 0);
-            if (!TryConsumeTurnProc(TurnProcKey, ref _procsThisTurn, 1)) return;
+            if (!TryConsumeTurnProc(ref _procsThisTurn, 1)) return;
 
             Flash();
             await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.IntValue, Owner);

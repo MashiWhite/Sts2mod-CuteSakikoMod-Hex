@@ -22,7 +22,7 @@ namespace CuteSakikoModHex.CuteSakikoModHexCode.Relics.Runes.Anon.Prismatic;
 /// </summary>
 public sealed class CuteSakikoModResonanceEchoRune : CuteAnonHextechRelicBase, IChordNoteHookHandler
 {
-    private const string TurnProcKey = "ResonanceEcho";
+    // HextechRunes 0.10.0 起 TryConsumeTurnProc 不再收 key，计数由 ref 字段按遗物实例隔离。
 
     /// <summary>本回合已触发次数（必须是字段，见节拍防护的说明）。</summary>
     private int _procsThisTurn;
@@ -45,7 +45,7 @@ public sealed class CuteSakikoModResonanceEchoRune : CuteAnonHextechRelicBase, I
         if (string.IsNullOrEmpty(chordId)) return Task.CompletedTask;
 
         EnsureTurnScopedStateCurrent(() => _procsThisTurn = 0);
-        if (!TryConsumeTurnProc(TurnProcKey, ref _procsThisTurn, 1)) return Task.CompletedTask;
+        if (!TryConsumeTurnProc(ref _procsThisTurn, 1)) return Task.CompletedTask;
 
         // 记录待回填；真正加回由补丁在 removeStored 之后执行
         PendingChordId = chordId;

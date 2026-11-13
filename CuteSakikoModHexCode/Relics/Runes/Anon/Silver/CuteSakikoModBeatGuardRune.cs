@@ -15,7 +15,7 @@ namespace CuteSakikoModHex.CuteSakikoModHexCode.Relics.Runes.Anon.Silver;
 /// </summary>
 public sealed class CuteSakikoModBeatGuardRune : CuteAnonHextechRelicBase, IChordNoteHookHandler
 {
-    private const string TurnProcKey = "BeatGuard";
+    // HextechRunes 0.10.0 起 TryConsumeTurnProc 不再收 key，计数由 ref 字段按遗物实例隔离。
     private const int BlockAmount = 4;
 
     /// <summary>
@@ -39,7 +39,7 @@ public sealed class CuteSakikoModBeatGuardRune : CuteAnonHextechRelicBase, IChor
 
         // 按持有者回合号懒清零（框架提供的标准做法），再消费"每回合 1 次"配额
         EnsureTurnScopedStateCurrent(() => _procsThisTurn = 0);
-        if (!TryConsumeTurnProc(TurnProcKey, ref _procsThisTurn, 1)) return;
+        if (!TryConsumeTurnProc(ref _procsThisTurn, 1)) return;
 
         Flash();
         await CreatureCmd.GainBlock(Owner.Creature, BlockAmount, 0, null);

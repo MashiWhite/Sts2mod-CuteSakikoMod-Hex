@@ -19,7 +19,7 @@ namespace CuteSakikoModHex.CuteSakikoModHexCode.Relics.Runes.Rana.Silver;
 /// </summary>
 public sealed class CuteSakikoModCatResonanceRune : CuteRanaHextechRelicBase
 {
-    private const string TurnProcKey = "CatResonance";
+    // HextechRunes 0.10.0 起 TryConsumeTurnProc 不再收 key，计数由 ref 字段按遗物实例隔离。
 
     /// <summary>本回合已触发次数（必须是字段）。</summary>
     private int _procsThisTurn;
@@ -38,7 +38,7 @@ public sealed class CuteSakikoModCatResonanceRune : CuteRanaHextechRelicBase
         if (!CombatManager.Instance.IsInProgress) return;
 
         EnsureTurnScopedStateCurrent(() => _procsThisTurn = 0);
-        if (!TryConsumeTurnProc(TurnProcKey, ref _procsThisTurn, 1)) return;
+        if (!TryConsumeTurnProc(ref _procsThisTurn, 1)) return;
 
         // 手牌已满时不复制
         var hand = Owner.PlayerCombatState?.Hand;

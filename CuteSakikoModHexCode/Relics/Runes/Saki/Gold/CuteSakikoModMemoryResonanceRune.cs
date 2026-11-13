@@ -41,7 +41,12 @@ public sealed class CuteSakikoModMemoryResonanceRune : CuteSakiObHextechRelicBas
         Flash();
         foreach (var enemy in enemies.ToList())
             await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+                // 0.108 起伤害管线带 CardPlay 参数；0.107 只有单参重载。
+#if CSK_GAME_108_OR_NEWER
                 .FromCard(card, cardPlay)
+#else
+                .FromCard(card)
+#endif
                 .Targeting(enemy)
                 .Execute(choiceContext);
     }

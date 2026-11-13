@@ -17,7 +17,7 @@ namespace CuteSakikoModHex.CuteSakikoModHexCode.Relics.Runes.Saki.Silver;
 /// </summary>
 public sealed class CuteSakikoModPressureTransferRune : CuteSakiObHextechRelicBase
 {
-    private const string TurnProcKey = "PressureTransfer";
+    // HextechRunes 0.10.0 起 TryConsumeTurnProc 不再收 key，计数由 ref 字段按遗物实例隔离。
 
     /// <summary>
     ///     本回合已触发次数。**必须是字段**：
@@ -45,7 +45,7 @@ public sealed class CuteSakikoModPressureTransferRune : CuteSakiObHextechRelicBa
 
         // 每回合第一次：按持有者回合号懒清零后消费配额
         EnsureTurnScopedStateCurrent(() => _procsThisTurn = 0);
-        if (!TryConsumeTurnProc(TurnProcKey, ref _procsThisTurn, 1)) return;
+        if (!TryConsumeTurnProc(ref _procsThisTurn, 1)) return;
 
         var combat = Owner.Creature.CombatState;
         var enemies = combat?.HittableEnemies;
